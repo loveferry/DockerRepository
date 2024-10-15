@@ -1,0 +1,11 @@
+FROM python:3.7.17@sha256:2011a37d2a08fe83dd9ff923e0f83bfd7290152e2e6afe359bde1453170d9bdc
+RUN apt-get update && \
+    apt-get install -y libgl1-mesa-glx && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo 'Asia/Shanghai' > /etc/timezone && \
+    pip install pyinstaller paddleocr paddlepaddle datetime pymysql && \
+    pip cache purge
+ENTRYPOINT git clone https://build05:870667@szgitlab.kedacom.com/sqad/internationalization-check.git -b 144 --depth 1 /usr/local/internationalization-check && \
+           python3
