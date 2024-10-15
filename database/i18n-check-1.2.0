@@ -1,0 +1,48 @@
+# 使用Ubuntu的轻量级版本作为基础镜像
+# 这里选择了Ubuntu的slim版本，它去除了很多不必要的包，使得镜像更加轻量
+FROM ubuntu:20.04
+
+# 设置非交互模式以避免安装过程中的交互提示
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 更新包列表并安装必要的依赖
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends software-properties-common wget curl git subversion ca-certificates build-essential checkinstall && \
+    # 添加deadsnakes PPA以安装特定版本的Python
+    add-apt-repository ppa:deadsnakes/ppa -y && \
+    apt-get update && \
+    # 安装OpenJDK 8（这里使用OpenJDK的官方PPA）
+    apt-get install -y --no-install-recommends openjdk-8-jdk python3.7 python3.7-venv python3.7-dev python3-pip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    pip install --upgrade pip
+
+# 设置JAVA_HOME环境变量
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+
+# 更新PATH环境变量以包含Python 3.7和JAVA_HOME的bin目录
+ENV PATH /usr/bin/python3.7:/usr/local/bin:${JAVA_HOME}/bin:${PATH}
+
+# 设置 国际化检测分支 环境变量
+ENV CHECK_BRANCH dev
+
+# 设置 国际化检测默认检测任务ID 环境变量
+ENV COMMAND_PARAM -1
+
+RUN apt-get update && \
+    apt-get install -y libgl1-mesa-glx bash iputils-ping && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo 'Asia/Shanghai' > /etc/timezone && \
+    pip install paddleocr==2.7.0.2 paddlepaddle==2.5.2 datetime pymysql mysql-connector-python chardet && \
+    pip cache purge && \
+    # 启动脚本
+    echo '#!/bin/bash' > /root/check_start.sh && \
+    echo 'git clone https://build05:870667@szgitlab.kedacom.com/sqad/internationalization-check.git -b $CHECK_BRANCH --depth 1 /root/i18n-check' >> /root/check_start.sh && \
+    echo 'cd /root/i18n-check' >> /root/check_start.sh && \
+    echo 'exec python3 check_kedacom.py "$COMMAND_PARAM"' >> /root/check_start.sh && \
+    chmod +x /root/check_start.sh
+
+# 设置容器启动时执行的命令
+CMD ["/bin/sh", "-c", "python3"]
