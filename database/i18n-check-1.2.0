@@ -27,7 +27,7 @@ ENV PATH /usr/bin/python3.7:/usr/local/bin:${JAVA_HOME}/bin:${PATH}
 ENV CHECK_BRANCH dev
 
 # 设置 国际化检测默认检测任务ID 环境变量
-ENV COMMAND_PARAM -1
+# ENV COMMAND_PARAM 1
 
 RUN apt-get update && \
     apt-get install -y libgl1-mesa-glx bash iputils-ping && \
