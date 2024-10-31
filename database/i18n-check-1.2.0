@@ -35,7 +35,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     locale-gen en_US.UTF-8 && \
-    update-locale && \
+    update-locale LANG=en_US.UTF-8 && \
+    update-locale LC_ALL=en_US.UTF-8 && \
     echo 'Asia/Shanghai' > /etc/timezone && \
     pip install paddleocr==2.7.0.2 paddlepaddle==2.5.2 datetime pymysql mysql-connector-python chardet && \
     pip cache purge && \
@@ -45,6 +46,10 @@ RUN apt-get update && \
     echo 'cd /root/i18n-check' >> /root/check_start.sh && \
     echo 'exec python3 check_kedacom.py "$COMMAND_PARAM"' >> /root/check_start.sh && \
     chmod +x /root/check_start.sh
+
+# 设置语言环境
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
 
 # 设置容器启动时执行的命令
 CMD ["/bin/sh", "-c", "python3"]
